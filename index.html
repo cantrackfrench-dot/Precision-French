@@ -3,68 +3,86 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Precision French iOS Fix</title>
+    <title>Precision French Synthesis Fix</title>
+    <!-- Core 3D engine and Augmented Reality frameworks -->
     <script src="https://aframe.io"></script>
     <script src="https://githack.com"></script>
     <style>
         #audioButton {
             position: absolute;
-            top: 30px;
+            top: 25px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 99999 !important;
             pointer-events: auto !important;
-            background-color: #0044ff;
+            background-color: #d11a2a; /* Custom Precision French brand red */
             color: white;
-            padding: 18px 36px;
+            padding: 16px 32px;
             border: none;
-            border-radius: 30px;
+            border-radius: 5px;
             font-weight: bold;
-            font-size: 18px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             cursor: pointer;
-            text-align: center;
-            width: 80%;
-            max-width: 300px;
+            width: 85%;
+            max-width: 280px;
         }
     </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
 
-    <!-- High-priority button overlay to capture true user-intent context -->
-    <button id="audioButton" onclick="forceIOSAudioUnlock()">🔊 TAP TO UNMUTE & PLAY</button>
+    <!-- High-priority button container -->
+    <button id="audioButton" onclick="initializeSynthEngine()">🔊 CALIBRATE AUDIO LAYER</button>
 
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-        <a-assets>
-            <audio id="testAudio" src="https://soundhelix.com" preload="auto" crossorigin="anonymous" loop></audio>
-        </a-assets>
-
         <a-marker preset="hiro">
-            <a-box position="0 0.5 0" material="color: #ff0000;"></a-box>
+            <!-- Floats a bright red block over your tracking marker -->
+            <a-box position="0 0.5 0" material="color: #d11a2a;"></a-box>
         </a-marker>
-
         
     </a-scene>
 
     <script>
-        function forceIOSAudioUnlock() {
-            var audio = document.querySelector("#testAudio");
-            var button = document.getElementById("audioButton");
+        let audioCtx = null;
 
-            // 1. Force native iOS Audio Context initialization
+        function initializeSynthEngine() {
+            // 1. Initialize the browser context natively to bypass external file security blocks
             window.AudioContext = window.AudioContext || window.webkitAudioContext;
-            var context = new AudioContext();
-            if (context.state === 'suspended') {
-                context.resume();
+            audioCtx = new AudioContext();
+            
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
             }
 
-            // 2. Clear mobile receiver mute states and route out of the bottom speakers
-            audio.play().then(() => {
-                button.innerHTML = "🎉 AUDIO ACTIVE - SCAN NOW";
-                button.style.backgroundColor = "#00cc66";
-            }).catch(e => {
-                alert("Mute Override Required. Please ensure your physical ring/silent switch on the side of your iPhone is switched UP to RING mode, then try tapping again!");
-            });
+            // 2. Play a rapid diagnostic tone pattern to confirm hardware activation
+            playDiagnosticTone(440, 0.1);  // Note A
+            setTimeout(() => playDiagnosticTone(554.37, 0.1), 120); // Note C#
+            setTimeout(() => playDiagnosticTone(659.25, 0.3), 240); // Note E
+
+            // 3. Update the interface layer button status
+            let btn = document.getElementById("audioButton");
+            btn.innerHTML = "✅ SYSTEM READY - SCAN HIRO";
+            btn.style.backgroundColor = "#00cc66";
+        }
+
+        function playDiagnosticTone(frequency, duration) {
+            if (!audioCtx) return;
+            
+            let oscillator = audioCtx.createOscillator();
+            let gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+            
+            // Manage clean volume curves to prevent loud crackles
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration);
         }
     </script>
 </body>
