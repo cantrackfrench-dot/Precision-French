@@ -110,14 +110,15 @@
             transform: translateY(-1px);
         }
 
-        .library-page, .lesson-page {
+        .library-page, .lesson-page, .reading-page {
             display: block;
             min-height: calc(850px - 84px);
         }
 
-        .lesson-page {
+        .lesson-page, .reading-page {
             display: none;
             padding: 26px 28px 32px;
+            overflow-y: auto;
         }
 
         .visible {
@@ -395,6 +396,101 @@
             line-height: 1.6;
         }
 
+        /* Reading page styles */
+        .reading-page-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .reading-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .reading-title-group h2 {
+            margin: 0;
+            font-size: clamp(1.8rem, 3vw, 2.4rem);
+            line-height: 1.1;
+        }
+
+        .reading-subtitle {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .reading-content {
+            background: rgba(255,255,255,0.7);
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            padding: 28px;
+            line-height: 1.8;
+            font-size: 1.05rem;
+            color: var(--ink);
+        }
+
+        .reading-content p {
+            margin: 0 0 18px 0;
+        }
+
+        .reading-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .reading-section {
+            margin-bottom: 24px;
+        }
+
+        .reading-section-title {
+            font-weight: 700;
+            font-size: 1.18rem;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .reading-vocab {
+            background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(246,243,255,0.8));
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .vocab-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .vocab-item:last-child {
+            border-bottom: none;
+        }
+
+        .vocab-word {
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 120px;
+        }
+
+        .vocab-def {
+            color: var(--muted);
+            flex: 1;
+        }
+
+        .reading-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--line);
+        }
+
         @media (max-width: 860px) {
             body {
                 padding: 14px;
@@ -410,7 +506,7 @@
                 height: 72px;
             }
 
-            .library-page, .lesson-page {
+            .library-page, .lesson-page, .reading-page {
                 padding: 18px 16px 24px;
             }
 
@@ -419,13 +515,19 @@
             }
 
             .page-intro,
-            .lesson-topbar {
+            .lesson-topbar,
+            .reading-header {
                 flex-direction: column;
                 align-items: flex-start;
             }
 
             .library-grid {
                 grid-template-columns: 1fr 1fr;
+            }
+
+            .reading-content {
+                padding: 18px;
+                font-size: 1rem;
             }
         }
 
@@ -441,6 +543,14 @@
             .ghost-btn, .primary-btn {
                 padding: 9px 12px;
                 font-size: 0.92rem;
+            }
+
+            .reading-controls {
+                flex-wrap: wrap;
+            }
+
+            .nav-btn {
+                flex: 1;
             }
         }
     </style>
@@ -507,6 +617,9 @@
                             <div class="media-text">
                                 Audio for this lesson will play automatically. Use the controls to pause, play, or adjust volume.
                             </div>
+                            <div class="lesson-actions">
+                                <button class="nav-btn primary" type="button" id="openReading">Reading Exercise</button>
+                            </div>
                         </div>
 
                         <div class="note-card">
@@ -522,56 +635,252 @@
                     </aside>
                 </div>
             </section>
+
+            <section class="reading-page" id="readingPage">
+                <div class="reading-page-container">
+                    <div class="reading-header">
+                        <div class="reading-title-group">
+                            <div class="lesson-kicker" id="readingKicker">Lesson 01</div>
+                            <h2 id="readingTitle">Greetings &amp; Introductions</h2>
+                            <p class="reading-subtitle">Reading & comprehension exercise</p>
+                        </div>
+                        <button class="ghost-btn" type="button" id="backFromReading">Back to lesson</button>
+                    </div>
+
+                    <div class="reading-content" id="readingContent">
+                        <!-- Reading content will be inserted here -->
+                    </div>
+
+                    <div class="reading-controls">
+                        <button class="nav-btn" type="button" id="readingPrev">Previous</button>
+                        <button class="nav-btn primary" type="button" id="readingNext">Next</button>
+                        <button class="nav-btn" type="button" id="readingBackLib" style="margin-left: auto;">Back to Library</button>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
     <script>
         const lessons = [
-            { id: 1, title: 'Greetings & Introductions', duration: '3:45', focus: 'Polite greetings, introductions, and basic small talk.', notes: 'Practice greeting patterns, pronouncing names, and responding naturally.', audioFile: 'lesson-01.mp3', phrases: ['Bonjour', 'Enchanté(e)', 'Comment allez-vous?', 'Je m\'appelle...'] },
-            { id: 2, title: 'Travel: At the Airport', duration: '4:20', focus: 'Checking in, asking questions, and understanding travel instructions.', notes: 'Focus on key travel phrases and listening for boarding times.', audioFile: 'lesson-02.mp3', phrases: ['Enregistrement', 'Passeport', 'Vol numéro...', 'Porte d\'embarquement'] },
-            { id: 3, title: 'Restaurant & Food', duration: '5:10', focus: 'Ordering food, asking for recommendations, and checking the bill.', notes: 'Learn common table vocabulary and polite service requests.', audioFile: 'lesson-03.mp3', phrases: ['Une table pour deux', 'Je voudrais...', 'L\'addition, s\'il vous plaît', 'C\'est délicieux'] },
-            { id: 4, title: 'Shopping & Haggling', duration: '4:00', focus: 'Asking prices and bargaining politely in a market.', notes: 'Use polite requests and understand price negotiation language.', audioFile: 'lesson-04.mp3', phrases: ['Combien ça coûte?', 'C\'est trop cher', 'Vous faites une réduction?', 'Je prends...'] },
-            { id: 5, title: 'Hotel & Accommodation', duration: '3:50', focus: 'Check-in, room requests, and basic hotel communication.', notes: 'Practice room booking phrases and recovery language for problems.', audioFile: 'lesson-05.mp3', phrases: ['Une chambre pour une nuit', 'Avec salle de bain', 'La clé, s\'il vous plaît', 'Je voudrais changer de chambre'] },
-            { id: 6, title: 'Asking Directions', duration: '3:30', focus: 'Getting around a city and asking for directions.', notes: 'Focus on locations, landmarks, and simple directional expressions.', audioFile: 'lesson-06.mp3', phrases: ['Où est...?', 'À gauche', 'À droite', 'Tout droit'] },
-            { id: 7, title: 'Movies & Entertainment', duration: '4:15', focus: 'Talking about films, tickets, and recommendations.', notes: 'Use common cinema vocabulary and short opinions in conversation.', audioFile: 'lesson-07.mp3', phrases: ['Un billet, s\'il vous plaît', 'Quel film recommandez-vous?', 'C\'était magnifique', 'J\'aime les comédies'] },
-            { id: 8, title: 'Sports & Hobbies', duration: '4:45', focus: 'Discussing activities, games, and free time.', notes: 'Focus on describing hobbies and asking about preferences.', audioFile: 'lesson-08.mp3', phrases: ['Je fais du sport', 'Mon loisir préféré', 'Vous jouez au football?', 'J\'aime nager'] },
-            { id: 9, title: 'Weather & Nature', duration: '3:40', focus: 'Talking about weather and natural scenes.', notes: 'Practice short descriptive sentences and common seasonal vocabulary.', audioFile: 'lesson-09.mp3', phrases: ['Il fait beau', 'Il pleut', 'C\'est nuageux', 'La température'] },
-            { id: 10, title: 'Family & Relationships', duration: '4:05', focus: 'Describing family members and talking about relationships.', notes: 'Use possessives and simple descriptive sentences.', audioFile: 'lesson-10.mp3', phrases: ['Ma famille', 'Mon frère', 'Ma soeur', 'Mes parents'] },
-            { id: 11, title: 'Health & Medical', duration: '4:30', focus: 'Talking about symptoms, appointments, and care.', notes: 'Understand basic health language for emergencies and routine visits.', audioFile: 'lesson-11.mp3', phrases: ['J\'ai mal à...', 'Le docteur', 'Une pharmacie', 'Prendre un médicament'] },
-            { id: 12, title: 'Work & Career', duration: '5:00', focus: 'Describing job roles and professional situations.', notes: 'Practice formal language for interviews, responsibilities, and roles.', audioFile: 'lesson-12.mp3', phrases: ['Mon travail', 'Je suis...', 'Mon patron', 'Une réunion'] },
-            { id: 13, title: 'Education & Studies', duration: '4:20', focus: 'Talking about class, school, and learning goals.', notes: 'Study common educational vocabulary and opinion phrases.', audioFile: 'lesson-13.mp3', phrases: ['L\'école', 'Une classe', 'Les études', 'Un examen'] },
-            { id: 14, title: 'Technology & Internet', duration: '4:10', focus: 'Discussing devices, apps, and online life.', notes: 'Use clear digital vocabulary and common support phrases.', audioFile: 'lesson-14.mp3', phrases: ['L\'ordinateur', 'Un téléphone', 'Internet', 'Une application'] },
-            { id: 15, title: 'Music & Arts', duration: '4:35', focus: 'Talking about music, films, and visual culture.', notes: 'Listen for adjectives and personal opinions.', audioFile: 'lesson-15.mp3', phrases: ['J\'aime la musique', 'Un concert', 'La peinture', 'Un artiste'] },
-            { id: 16, title: 'Food Recipes & Cooking', duration: '5:15', focus: 'Describing ingredients and cooking steps.', notes: 'Focus on sequence words and kitchen vocabulary.', audioFile: 'lesson-16.mp3', phrases: ['Ingrédients', 'Mélanger', 'Cuire', 'Savourer'] },
-            { id: 17, title: 'Fashion & Clothing', duration: '3:55', focus: 'Shopping for clothes and talking about style.', notes: 'Use descriptive adjectives and practical shop language.', audioFile: 'lesson-17.mp3', phrases: ['Un vêtement', 'La couleur', 'La taille', 'C\'est à la mode'] },
-            { id: 18, title: 'Transportation', duration: '4:25', focus: 'Using buses, trains, taxis, and routes.', notes: 'Focus on time, direction, and station vocabulary.', audioFile: 'lesson-18.mp3', phrases: ['Une gare', 'Un bus', 'Un taxi', 'Quelle ligne?'] },
-            { id: 19, title: 'Housing & Furniture', duration: '4:40', focus: 'Talking about homes, rooms, and furniture.', notes: 'Combine descriptive vocabulary with practical comparison phrases.', audioFile: 'lesson-19.mp3', phrases: ['Une maison', 'Un appartement', 'Une chambre', 'Les meubles'] },
-            { id: 20, title: 'Money & Finance', duration: '4:50', focus: 'Talking about paying, prices, and budgets.', notes: 'Listen for numbers, amounts, and credit-card language.', audioFile: 'lesson-20.mp3', phrases: ['L\'argent', 'Le prix', 'Payer', 'Un budget'] },
-            { id: 21, title: 'Time & Scheduling', duration: '3:25', focus: 'Discussing time, appointments, and planning.', notes: 'Use time expressions and asking about schedules.', audioFile: 'lesson-21.mp3', phrases: ['L\'heure', 'Aujourd\'hui', 'Demain', 'La semaine'] },
-            { id: 22, title: 'Numbers & Counting', duration: '3:15', focus: 'Understanding everyday number use and calculations.', notes: 'Listen carefully to phone numbers, prices, and dates.', audioFile: 'lesson-22.mp3', phrases: ['Un', 'Deux', 'Trois', 'Compter'] },
-            { id: 23, title: 'Colors & Descriptions', duration: '3:45', focus: 'Describing objects and visual details accurately.', notes: 'Use descriptors like size, color, and texture naturally.', audioFile: 'lesson-23.mp3', phrases: ['Rouge', 'Bleu', 'Grand', 'Petit'] },
-            { id: 24, title: 'Animals & Pets', duration: '4:00', focus: 'Talking about pets and wildlife.', notes: 'Use simple descriptive speaking and opinions.', audioFile: 'lesson-24.mp3', phrases: ['Un chien', 'Un chat', 'Un animal', 'Un oiseau'] },
-            { id: 25, title: 'Plants & Gardening', duration: '4:10', focus: 'Discussing flowers, gardens, and plants.', notes: 'Practice seasonal and natural vocabulary.', audioFile: 'lesson-25.mp3', phrases: ['Une fleur', 'Un arbre', 'Le jardin', 'La nature'] },
-            { id: 26, title: 'Politics & Current Events', duration: '5:30', focus: 'Discussing public life and recent news topics.', notes: 'Use neutral, objective phrasing for serious topics.', audioFile: 'lesson-26.mp3', phrases: ['La politique', 'Les nouvelles', 'Un gouvernement', 'Une élection'] },
-            { id: 27, title: 'History & Culture', duration: '5:45', focus: 'Explaining historical moments and cultural traditions.', notes: 'Use sequencing and descriptive past-tense phrasing.', audioFile: 'lesson-27.mp3', phrases: ['L\'histoire', 'Une culture', 'Traditionnelle', 'Le passé'] },
-            { id: 28, title: 'Geography & Cities', duration: '4:55', focus: 'Describing places, regions, and city life.', notes: 'Practice location vocabulary and comparisons.', audioFile: 'lesson-28.mp3', phrases: ['Une ville', 'Un pays', 'Une région', 'La géographie'] },
-            { id: 29, title: 'Literature & Books', duration: '5:20', focus: 'Talking about reading habits and literary preferences.', notes: 'Build longer opinion sentences with review language.', audioFile: 'lesson-29.mp3', phrases: ['Un livre', 'Un auteur', 'Lire', 'Une histoire'] },
-            { id: 30, title: 'Science & Technology', duration: '5:05', focus: 'Discussing research, discoveries, and innovation.', notes: 'Use formal vocabulary and compare facts clearly.', audioFile: 'lesson-30.mp3', phrases: ['La science', 'La technologie', 'Une découverte', 'L\'innovation'] },
-            { id: 31, title: 'DELF Listening Practice 1', duration: '6:00', focus: 'Short listening tasks with connected speech and details.', notes: 'Work on overall understanding before focusing on details.', audioFile: 'lesson-31.mp3', phrases: ['Écouter', 'Comprendre', 'Détail', 'Ensemble'] },
-            { id: 32, title: 'DELF Listening Practice 2', duration: '6:15', focus: 'Listening for inference, nuance, and context.', notes: 'Train your ear to listen beyond literal meaning.', audioFile: 'lesson-32.mp3', phrases: ['Inférence', 'Contexte', 'Nuance', 'Signification'] },
-            { id: 33, title: 'DELF Speaking Tips', duration: '5:40', focus: 'Building fluency and confidence in spoken French.', notes: 'Use connectors, pause naturally, and keep answers structured.', audioFile: 'lesson-33.mp3', phrases: ['Parler', 'Fluidité', 'Confiance', 'Connecteur'] },
-            { id: 34, title: 'DELF Reading Strategies', duration: '5:30', focus: 'Skimming, scanning, and matching meaning to questions.', notes: 'Practice finding the correct answer without reading every word.', audioFile: 'lesson-34.mp3', phrases: ['Lire', 'Skimmer', 'Scanner', 'Comprendre'] },
-            { id: 35, title: 'DELF Writing Guide', duration: '6:00', focus: 'Structuring answers and using phrases accurately.', notes: 'Keep writing clear, short, and organised.', audioFile: 'lesson-35.mp3', phrases: ['Écrire', 'Structure', 'Organiser', 'Clarté'] },
-            { id: 36, title: 'Common Mistakes', duration: '4:45', focus: 'Recognising recurring errors and how to correct them.', notes: 'Practice precision and avoid over-relying on translation.', audioFile: 'lesson-36.mp3', phrases: ['Erreur', 'Correction', 'Précision', 'Attention'] },
-            { id: 37, title: 'Pronunciation Practice', duration: '5:15', focus: 'Working on rhythm, liaison, and vowel clarity.', notes: 'Repeat short phrases slowly before speaking at natural speed.', audioFile: 'lesson-37.mp3', phrases: ['Prononciation', 'Rythme', 'Liaison', 'Voyelle'] },
-            { id: 38, title: 'Slang & Colloquialisms', duration: '4:30', focus: 'Understanding informal French in real conversation.', notes: 'Use slang selectively and keep formality in mind.', audioFile: 'lesson-38.mp3', phrases: ['Argot', 'Informel', 'Conversation', 'Naturel'] },
-            { id: 39, title: 'Business French', duration: '5:50', focus: 'Professional vocabulary and formal meetings.', notes: 'Practice concise, polite, and professional answers.', audioFile: 'lesson-39.mp3', phrases: ['Professionnel', 'Affaires', 'Réunion', 'Formel'] },
-            { id: 40, title: 'Exam Day Checklist', duration: '3:20', focus: 'Final day preparation and confidence routines.', notes: 'Be calm, organised, and ready to use the language you know.', audioFile: 'lesson-40.mp3', phrases: ['Préparation', 'Confiance', 'Organisé', 'Prêt'] },
+            { 
+                id: 1, 
+                title: 'Greetings & Introductions', 
+                duration: '3:45', 
+                focus: 'Polite greetings, introductions, and basic small talk.', 
+                notes: 'Practice greeting patterns, pronouncing names, and responding naturally.', 
+                audioFile: 'lesson-01.mp3', 
+                phrases: ['Bonjour', 'Enchanté(e)', 'Comment allez-vous?', 'Je m\'appelle...'],
+                reading: `
+                    <div class="reading-section">
+                        <h3 class="reading-section-title">Reading Exercise: French Greetings</h3>
+                        <p>
+                            In France, greetings are an essential part of daily social interaction. When meeting someone for the first time, 
+                            it is customary to shake hands and say <strong>"Bonjour"</strong> (Hello) or <strong>"Bonsoir"</strong> (Good evening).
+                        </p>
+                        <p>
+                            After shaking hands, you might say <strong>"Enchanté(e)"</strong> (Pleased to meet you). The feminine form 
+                            "Enchantée" is used by women, while "Enchanté" is used by men.
+                        </p>
+                        <p>
+                            A common opening question is <strong>"Comment allez-vous?"</strong> (How are you? - formal) or 
+                            <strong>"Ça va?"</strong> (How are you? - informal). The expected response is usually <strong>"Ça va bien, merci"</strong> 
+                            (I'm doing well, thank you).
+                        </p>
+                        <p>
+                            When introducing yourself, you would say <strong>"Je m'appelle..."</strong> (My name is...) followed by your name. 
+                            For example: "Je m'appelle Marie" (My name is Marie).
+                        </p>
+                    </div>
+
+                    <div class="reading-vocab">
+                        <div class="panel-label">Key Vocabulary</div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Bonjour</div>
+                            <div class="vocab-def">Hello (used during the day)</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Bonsoir</div>
+                            <div class="vocab-def">Good evening</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Enchanté(e)</div>
+                            <div class="vocab-def">Pleased to meet you</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Comment allez-vous?</div>
+                            <div class="vocab-def">How are you? (formal)</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Ça va?</div>
+                            <div class="vocab-def">How are you? (informal)</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Je m'appelle</div>
+                            <div class="vocab-def">My name is</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Merci</div>
+                            <div class="vocab-def">Thank you</div>
+                        </div>
+                    </div>
+                `
+            },
+            { 
+                id: 2, 
+                title: 'Travel: At the Airport', 
+                duration: '4:20', 
+                focus: 'Checking in, asking questions, and understanding travel instructions.', 
+                notes: 'Focus on key travel phrases and listening for boarding times.', 
+                audioFile: 'lesson-02.mp3', 
+                phrases: ['Enregistrement', 'Passeport', 'Vol numéro...', 'Porte d\'embarquement'],
+                reading: `
+                    <div class="reading-section">
+                        <h3 class="reading-section-title">Reading Exercise: At the Airport</h3>
+                        <p>
+                            When traveling internationally, one of the first steps at the airport is check-in, or <strong>"l'enregistrement"</strong>. 
+                            At the check-in counter, airline staff will ask you for your <strong>"passeport"</strong> (passport) and ticket.
+                        </p>
+                        <p>
+                            You may hear announcements about your flight number, such as <strong>"Vol numéro AF123"</strong> (Flight number AF123). 
+                            It's important to note the <strong>"porte d'embarquement"</strong> (boarding gate), which is usually displayed on screens throughout the airport.
+                        </p>
+                        <p>
+                            Common phrases you might hear at the airport include:
+                            <strong>"Où est la porte d'embarquement?"</strong> (Where is the boarding gate?) and 
+                            <strong>"Veuillez vous diriger vers la porte"</strong> (Please proceed to the gate).
+                        </p>
+                    </div>
+
+                    <div class="reading-vocab">
+                        <div class="panel-label">Key Vocabulary</div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Enregistrement</div>
+                            <div class="vocab-def">Check-in</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Passeport</div>
+                            <div class="vocab-def">Passport</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Vol numéro</div>
+                            <div class="vocab-def">Flight number</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Porte d'embarquement</div>
+                            <div class="vocab-def">Boarding gate</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Billet</div>
+                            <div class="vocab-def">Ticket</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Douane</div>
+                            <div class="vocab-def">Customs</div>
+                        </div>
+                    </div>
+                `
+            },
+            { 
+                id: 3, 
+                title: 'Restaurant & Food', 
+                duration: '5:10', 
+                focus: 'Ordering food, asking for recommendations, and checking the bill.', 
+                notes: 'Learn common table vocabulary and polite service requests.', 
+                audioFile: 'lesson-03.mp3', 
+                phrases: ['Une table pour deux', 'Je voudrais...', 'L\'addition, s\'il vous plaît', 'C\'est délicieux'],
+                reading: `
+                    <div class="reading-section">
+                        <h3 class="reading-section-title">Reading Exercise: At the Restaurant</h3>
+                        <p>
+                            When dining out in a French restaurant, the first step is to request a table. You might say 
+                            <strong>"Une table pour deux, s'il vous plaît"</strong> (A table for two, please).
+                        </p>
+                        <p>
+                            Once seated, you can order by saying <strong>"Je voudrais..."</strong> (I would like...) followed by your choice. 
+                            Common dishes include <strong>"le steak"</strong> (steak), <strong>"le poisson"</strong> (fish), and <strong>"les pâtes"</strong> (pasta).
+                        </p>
+                        <p>
+                            If you'd like a recommendation, you can ask the server: <strong>"Que recommandez-vous?"</strong> (What do you recommend?). 
+                            After enjoying your meal, compliment it by saying <strong>"C'est délicieux!"</strong> (It's delicious!).
+                        </p>
+                        <p>
+                            When you're ready to leave, request the bill by saying <strong>"L'addition, s'il vous plaît"</strong> (The bill, please).
+                        </p>
+                    </div>
+
+                    <div class="reading-vocab">
+                        <div class="panel-label">Key Vocabulary</div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Une table</div>
+                            <div class="vocab-def">A table</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Je voudrais</div>
+                            <div class="vocab-def">I would like</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">L'addition</div>
+                            <div class="vocab-def">The bill</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">C'est délicieux</div>
+                            <div class="vocab-def">It's delicious</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Le menu</div>
+                            <div class="vocab-def">The menu</div>
+                        </div>
+                        <div class="vocab-item">
+                            <div class="vocab-word">Que recommandez-vous?</div>
+                            <div class="vocab-def">What do you recommend?</div>
+                        </div>
+                    </div>
+                `
+            },
+            { id: 4, title: 'Shopping & Haggling', duration: '4:00', focus: 'Asking prices and bargaining politely in a market.', notes: 'Use polite requests and understand price negotiation language.', audioFile: 'lesson-04.mp3', phrases: ['Combien ça coûte?', 'C\'est trop cher', 'Vous faites une réduction?', 'Je prends...'], reading: '<p>Reading content for lesson 4 will be added here.</p>' },
+            { id: 5, title: 'Hotel & Accommodation', duration: '3:50', focus: 'Check-in, room requests, and basic hotel communication.', notes: 'Practice room booking phrases and recovery language for problems.', audioFile: 'lesson-05.mp3', phrases: ['Une chambre pour une nuit', 'Avec salle de bain', 'La clé, s\'il vous plaît', 'Je voudrais changer de chambre'], reading: '<p>Reading content for lesson 5 will be added here.</p>' },
+            { id: 6, title: 'Asking Directions', duration: '3:30', focus: 'Getting around a city and asking for directions.', notes: 'Focus on locations, landmarks, and simple directional expressions.', audioFile: 'lesson-06.mp3', phrases: ['Où est...?', 'À gauche', 'À droite', 'Tout droit'], reading: '<p>Reading content for lesson 6 will be added here.</p>' },
+            { id: 7, title: 'Movies & Entertainment', duration: '4:15', focus: 'Talking about films, tickets, and recommendations.', notes: 'Use common cinema vocabulary and short opinions in conversation.', audioFile: 'lesson-07.mp3', phrases: ['Un billet, s\'il vous plaît', 'Quel film recommandez-vous?', 'C\'était magnifique', 'J\'aime les comédies'], reading: '<p>Reading content for lesson 7 will be added here.</p>' },
+            { id: 8, title: 'Sports & Hobbies', duration: '4:45', focus: 'Discussing activities, games, and free time.', notes: 'Focus on describing hobbies and asking about preferences.', audioFile: 'lesson-08.mp3', phrases: ['Je fais du sport', 'Mon loisir préféré', 'Vous jouez au football?', 'J\'aime nager'], reading: '<p>Reading content for lesson 8 will be added here.</p>' },
+            { id: 9, title: 'Weather & Nature', duration: '3:40', focus: 'Talking about weather and natural scenes.', notes: 'Practice short descriptive sentences and common seasonal vocabulary.', audioFile: 'lesson-09.mp3', phrases: ['Il fait beau', 'Il pleut', 'C\'est nuageux', 'La température'], reading: '<p>Reading content for lesson 9 will be added here.</p>' },
+            { id: 10, title: 'Family & Relationships', duration: '4:05', focus: 'Describing family members and talking about relationships.', notes: 'Use possessives and simple descriptive sentences.', audioFile: 'lesson-10.mp3', phrases: ['Ma famille', 'Mon frère', 'Ma soeur', 'Mes parents'], reading: '<p>Reading content for lesson 10 will be added here.</p>' },
+            { id: 11, title: 'Health & Medical', duration: '4:30', focus: 'Talking about symptoms, appointments, and care.', notes: 'Understand basic health language for emergencies and routine visits.', audioFile: 'lesson-11.mp3', phrases: ['J\'ai mal à...', 'Le docteur', 'Une pharmacie', 'Prendre un médicament'], reading: '<p>Reading content for lesson 11 will be added here.</p>' },
+            { id: 12, title: 'Work & Career', duration: '5:00', focus: 'Describing job roles and professional situations.', notes: 'Practice formal language for interviews, responsibilities, and roles.', audioFile: 'lesson-12.mp3', phrases: ['Mon travail', 'Je suis...', 'Mon patron', 'Une réunion'], reading: '<p>Reading content for lesson 12 will be added here.</p>' },
+            { id: 13, title: 'Education & Studies', duration: '4:20', focus: 'Talking about class, school, and learning goals.', notes: 'Study common educational vocabulary and opinion phrases.', audioFile: 'lesson-13.mp3', phrases: ['L\'école', 'Une classe', 'Les études', 'Un examen'], reading: '<p>Reading content for lesson 13 will be added here.</p>' },
+            { id: 14, title: 'Technology & Internet', duration: '4:10', focus: 'Discussing devices, apps, and online life.', notes: 'Use clear digital vocabulary and common support phrases.', audioFile: 'lesson-14.mp3', phrases: ['L\'ordinateur', 'Un téléphone', 'Internet', 'Une application'], reading: '<p>Reading content for lesson 14 will be added here.</p>' },
+            { id: 15, title: 'Music & Arts', duration: '4:35', focus: 'Talking about music, films, and visual culture.', notes: 'Listen for adjectives and personal opinions.', audioFile: 'lesson-15.mp3', phrases: ['J\'aime la musique', 'Un concert', 'La peinture', 'Un artiste'], reading: '<p>Reading content for lesson 15 will be added here.</p>' },
+            { id: 16, title: 'Food Recipes & Cooking', duration: '5:15', focus: 'Describing ingredients and cooking steps.', notes: 'Focus on sequence words and kitchen vocabulary.', audioFile: 'lesson-16.mp3', phrases: ['Ingrédients', 'Mélanger', 'Cuire', 'Savourer'], reading: '<p>Reading content for lesson 16 will be added here.</p>' },
+            { id: 17, title: 'Fashion & Clothing', duration: '3:55', focus: 'Shopping for clothes and talking about style.', notes: 'Use descriptive adjectives and practical shop language.', audioFile: 'lesson-17.mp3', phrases: ['Un vêtement', 'La couleur', 'La taille', 'C\'est à la mode'], reading: '<p>Reading content for lesson 17 will be added here.</p>' },
+            { id: 18, title: 'Transportation', duration: '4:25', focus: 'Using buses, trains, taxis, and routes.', notes: 'Focus on time, direction, and station vocabulary.', audioFile: 'lesson-18.mp3', phrases: ['Une gare', 'Un bus', 'Un taxi', 'Quelle ligne?'], reading: '<p>Reading content for lesson 18 will be added here.</p>' },
+            { id: 19, title: 'Housing & Furniture', duration: '4:40', focus: 'Talking about homes, rooms, and furniture.', notes: 'Combine descriptive vocabulary with practical comparison phrases.', audioFile: 'lesson-19.mp3', phrases: ['Une maison', 'Un appartement', 'Une chambre', 'Les meubles'], reading: '<p>Reading content for lesson 19 will be added here.</p>' },
+            { id: 20, title: 'Money & Finance', duration: '4:50', focus: 'Talking about paying, prices, and budgets.', notes: 'Listen for numbers, amounts, and credit-card language.', audioFile: 'lesson-20.mp3', phrases: ['L\'argent', 'Le prix', 'Payer', 'Un budget'], reading: '<p>Reading content for lesson 20 will be added here.</p>' },
+            { id: 21, title: 'Time & Scheduling', duration: '3:25', focus: 'Discussing time, appointments, and planning.', notes: 'Use time expressions and asking about schedules.', audioFile: 'lesson-21.mp3', phrases: ['L\'heure', 'Aujourd\'hui', 'Demain', 'La semaine'], reading: '<p>Reading content for lesson 21 will be added here.</p>' },
+            { id: 22, title: 'Numbers & Counting', duration: '3:15', focus: 'Understanding everyday number use and calculations.', notes: 'Listen carefully to phone numbers, prices, and dates.', audioFile: 'lesson-22.mp3', phrases: ['Un', 'Deux', 'Trois', 'Compter'], reading: '<p>Reading content for lesson 22 will be added here.</p>' },
+            { id: 23, title: 'Colors & Descriptions', duration: '3:45', focus: 'Describing objects and visual details accurately.', notes: 'Use descriptors like size, color, and texture naturally.', audioFile: 'lesson-23.mp3', phrases: ['Rouge', 'Bleu', 'Grand', 'Petit'], reading: '<p>Reading content for lesson 23 will be added here.</p>' },
+            { id: 24, title: 'Animals & Pets', duration: '4:00', focus: 'Talking about pets and wildlife.', notes: 'Use simple descriptive speaking and opinions.', audioFile: 'lesson-24.mp3', phrases: ['Un chien', 'Un chat', 'Un animal', 'Un oiseau'], reading: '<p>Reading content for lesson 24 will be added here.</p>' },
+            { id: 25, title: 'Plants & Gardening', duration: '4:10', focus: 'Discussing flowers, gardens, and plants.', notes: 'Practice seasonal and natural vocabulary.', audioFile: 'lesson-25.mp3', phrases: ['Une fleur', 'Un arbre', 'Le jardin', 'La nature'], reading: '<p>Reading content for lesson 25 will be added here.</p>' },
+            { id: 26, title: 'Politics & Current Events', duration: '5:30', focus: 'Discussing public life and recent news topics.', notes: 'Use neutral, objective phrasing for serious topics.', audioFile: 'lesson-26.mp3', phrases: ['La politique', 'Les nouvelles', 'Un gouvernement', 'Une élection'], reading: '<p>Reading content for lesson 26 will be added here.</p>' },
+            { id: 27, title: 'History & Culture', duration: '5:45', focus: 'Explaining historical moments and cultural traditions.', notes: 'Use sequencing and descriptive past-tense phrasing.', audioFile: 'lesson-27.mp3', phrases: ['L\'histoire', 'Une culture', 'Traditionnelle', 'Le passé'], reading: '<p>Reading content for lesson 27 will be added here.</p>' },
+            { id: 28, title: 'Geography & Cities', duration: '4:55', focus: 'Describing places, regions, and city life.', notes: 'Practice location vocabulary and comparisons.', audioFile: 'lesson-28.mp3', phrases: ['Une ville', 'Un pays', 'Une région', 'La géographie'], reading: '<p>Reading content for lesson 28 will be added here.</p>' },
+            { id: 29, title: 'Literature & Books', duration: '5:20', focus: 'Talking about reading habits and literary preferences.', notes: 'Build longer opinion sentences with review language.', audioFile: 'lesson-29.mp3', phrases: ['Un livre', 'Un auteur', 'Lire', 'Une histoire'], reading: '<p>Reading content for lesson 29 will be added here.</p>' },
+            { id: 30, title: 'Science & Technology', duration: '5:05', focus: 'Discussing research, discoveries, and innovation.', notes: 'Use formal vocabulary and compare facts clearly.', audioFile: 'lesson-30.mp3', phrases: ['La science', 'La technologie', 'Une découverte', 'L\'innovation'], reading: '<p>Reading content for lesson 30 will be added here.</p>' },
+            { id: 31, title: 'DELF Listening Practice 1', duration: '6:00', focus: 'Short listening tasks with connected speech and details.', notes: 'Work on overall understanding before focusing on details.', audioFile: 'lesson-31.mp3', phrases: ['Écouter', 'Comprendre', 'Détail', 'Ensemble'], reading: '<p>Reading content for lesson 31 will be added here.</p>' },
+            { id: 32, title: 'DELF Listening Practice 2', duration: '6:15', focus: 'Listening for inference, nuance, and context.', notes: 'Train your ear to listen beyond literal meaning.', audioFile: 'lesson-32.mp3', phrases: ['Inférence', 'Contexte', 'Nuance', 'Signification'], reading: '<p>Reading content for lesson 32 will be added here.</p>' },
+            { id: 33, title: 'DELF Speaking Tips', duration: '5:40', focus: 'Building fluency and confidence in spoken French.', notes: 'Use connectors, pause naturally, and keep answers structured.', audioFile: 'lesson-33.mp3', phrases: ['Parler', 'Fluidité', 'Confiance', 'Connecteur'], reading: '<p>Reading content for lesson 33 will be added here.</p>' },
+            { id: 34, title: 'DELF Reading Strategies', duration: '5:30', focus: 'Skimming, scanning, and matching meaning to questions.', notes: 'Practice finding the correct answer without reading every word.', audioFile: 'lesson-34.mp3', phrases: ['Lire', 'Skimmer', 'Scanner', 'Comprendre'], reading: '<p>Reading content for lesson 34 will be added here.</p>' },
+            { id: 35, title: 'DELF Writing Guide', duration: '6:00', focus: 'Structuring answers and using phrases accurately.', notes: 'Keep writing clear, short, and organised.', audioFile: 'lesson-35.mp3', phrases: ['Écrire', 'Structure', 'Organiser', 'Clarté'], reading: '<p>Reading content for lesson 35 will be added here.</p>' },
+            { id: 36, title: 'Common Mistakes', duration: '4:45', focus: 'Recognising recurring errors and how to correct them.', notes: 'Practice precision and avoid over-relying on translation.', audioFile: 'lesson-36.mp3', phrases: ['Erreur', 'Correction', 'Précision', 'Attention'], reading: '<p>Reading content for lesson 36 will be added here.</p>' },
+            { id: 37, title: 'Pronunciation Practice', duration: '5:15', focus: 'Working on rhythm, liaison, and vowel clarity.', notes: 'Repeat short phrases slowly before speaking at natural speed.', audioFile: 'lesson-37.mp3', phrases: ['Prononciation', 'Rythme', 'Liaison', 'Voyelle'], reading: '<p>Reading content for lesson 37 will be added here.</p>' },
+            { id: 38, title: 'Slang & Colloquialisms', duration: '4:30', focus: 'Understanding informal French in real conversation.', notes: 'Use slang selectively and keep formality in mind.', audioFile: 'lesson-38.mp3', phrases: ['Argot', 'Informel', 'Conversation', 'Naturel'], reading: '<p>Reading content for lesson 38 will be added here.</p>' },
+            { id: 39, title: 'Business French', duration: '5:50', focus: 'Professional vocabulary and formal meetings.', notes: 'Practice concise, polite, and professional answers.', audioFile: 'lesson-39.mp3', phrases: ['Professionnel', 'Affaires', 'Réunion', 'Formel'], reading: '<p>Reading content for lesson 39 will be added here.</p>' },
+            { id: 40, title: 'Exam Day Checklist', duration: '3:20', focus: 'Final day preparation and confidence routines.', notes: 'Be calm, organised, and ready to use the language you know.', audioFile: 'lesson-40.mp3', phrases: ['Préparation', 'Confiance', 'Organisé', 'Prêt'], reading: '<p>Reading content for lesson 40 will be added here.</p>' },
         ];
 
         const libraryGrid = document.getElementById('libraryGrid');
         const libraryPage = document.getElementById('libraryPage');
         const lessonPage = document.getElementById('lessonPage');
+        const readingPage = document.getElementById('readingPage');
         const lessonTitle = document.getElementById('lessonTitle');
         const lessonKicker = document.getElementById('lessonKicker');
         const phraseList = document.getElementById('phraseList');
@@ -580,6 +889,9 @@
         const lessonAudio = document.getElementById('lessonAudio');
         const audioSource = document.getElementById('audioSource');
         const audioStatus = document.getElementById('audioStatus');
+        const readingTitle = document.getElementById('readingTitle');
+        const readingKicker = document.getElementById('readingKicker');
+        const readingContent = document.getElementById('readingContent');
 
         let currentLessonId = 1;
 
@@ -631,6 +943,12 @@
             });
         }
 
+        function setReadingContent(lesson) {
+            readingTitle.textContent = lesson.title;
+            readingKicker.textContent = `Lesson ${String(lesson.id).padStart(2, '0')}`;
+            readingContent.innerHTML = lesson.reading;
+        }
+
         function showLesson(lessonId) {
             const lesson = lessons.find((item) => item.id === lessonId);
             if (!lesson) return;
@@ -644,6 +962,7 @@
 
             libraryPage.classList.remove('visible');
             lessonPage.classList.add('visible');
+            readingPage.classList.remove('visible');
 
             // Auto-play audio after a brief delay to ensure src is set
             setTimeout(() => {
@@ -653,9 +972,24 @@
             }, 100);
         }
 
+        function showReading(lessonId) {
+            const lesson = lessons.find((item) => item.id === lessonId);
+            if (!lesson) return;
+
+            setReadingContent(lesson);
+
+            lessonPage.classList.remove('visible');
+            readingPage.classList.add('visible');
+            libraryPage.classList.remove('visible');
+
+            // Pause audio when switching to reading
+            lessonAudio.pause();
+        }
+
         function showLibrary() {
             libraryPage.classList.add('visible');
             lessonPage.classList.remove('visible');
+            readingPage.classList.remove('visible');
             lessonAudio.pause();
             lessonAudio.currentTime = 0;
         }
@@ -667,6 +1001,14 @@
             showLesson(lessons[nextIndex].id);
         }
 
+        function moveReading(offset) {
+            let nextIndex = lessons.findIndex((lesson) => lesson.id === currentLessonId) + offset;
+            if (nextIndex < 0) nextIndex = 0;
+            if (nextIndex >= lessons.length) nextIndex = lessons.length - 1;
+            showReading(lessons[nextIndex].id);
+            currentLessonId = lessons[nextIndex].id;
+        }
+
         // Event listeners
         document.getElementById('backToLibrary').addEventListener('click', showLibrary);
         document.getElementById('libraryButton').addEventListener('click', showLibrary);
@@ -676,6 +1018,11 @@
         });
         document.getElementById('prevLesson').addEventListener('click', () => moveLesson(-1));
         document.getElementById('nextLesson').addEventListener('click', () => moveLesson(1));
+        document.getElementById('openReading').addEventListener('click', () => showReading(currentLessonId));
+        document.getElementById('backFromReading').addEventListener('click', () => showLesson(currentLessonId));
+        document.getElementById('readingPrev').addEventListener('click', () => moveReading(-1));
+        document.getElementById('readingNext').addEventListener('click', () => moveReading(1));
+        document.getElementById('readingBackLib').addEventListener('click', showLibrary);
 
         // Audio event listeners for status updates
         lessonAudio.addEventListener('play', () => {
