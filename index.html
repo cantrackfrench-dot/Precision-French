@@ -6,16 +6,34 @@
     <title>Precision French Test</title>
     <script src="https://aframe.io"></script>
     <script src="https://githack.com"></script>
+    <style>
+        /* Force the button layer to remain directly on top of the camera canvas */
+        #audioButton {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 99999 !important;
+            pointer-events: auto !important;
+            background-color: #ff0000;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
-    <div style="position: absolute; top: 10px; left: 10px; z-index: 999; background: white; padding: 15px; border-radius: 5px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
-        📢 STEP 1: Tap this text box first!<br>
-        📷 STEP 2: Point camera at a Hiro marker!
-    </div>
+
+    <!-- This button is explicitly configured to handle the iOS/Android touch activation -->
+    <button id="audioButton" onclick="startAudio()">🔊 ACTIVATE AUDIO FIRST</button>
 
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
         <a-assets>
-            <!-- Standard MP3 streaming file configuration for universal mobile support -->
             <audio id="testAudio" src="https://soundhelix.com" preload="auto" crossorigin="anonymous"></audio>
         </a-assets>
 
@@ -27,15 +45,19 @@
     </a-scene>
 
     <script>
-        // Universal touch interface interaction unlock
-        document.body.addEventListener('click', function() {
+        function startAudio() {
             var audio = document.querySelector("#testAudio");
+            var button = document.getElementById("audioButton");
+            
             audio.play().then(() => {
-                alert("🔊 Audio system unlocked and playing successfully!");
+                // Change button appearance to confirm it works
+                button.innerHTML = "✅ AUDIO RUNNING - SCAN NOW";
+                button.style.backgroundColor = "#00cc66";
             }).catch(e => {
-                console.log("Playback blocked:", e);
+                alert("Playback error: " + e.message);
             });
-        });
+        }
     </script>
 </body>
 </html>
+
