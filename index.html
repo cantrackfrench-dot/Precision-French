@@ -1,40 +1,44 @@
+
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Precision French Test</title>
+    <title>Precision French iOS Fix</title>
     <script src="https://aframe.io"></script>
     <script src="https://githack.com"></script>
     <style>
-        /* Force the button layer to remain directly on top of the camera canvas */
         #audioButton {
             position: absolute;
-            top: 20px;
+            top: 30px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 99999 !important;
             pointer-events: auto !important;
-            background-color: #ff0000;
+            background-color: #0044ff;
             color: white;
-            padding: 15px 30px;
+            padding: 18px 36px;
             border: none;
-            border-radius: 8px;
+            border-radius: 30px;
             font-weight: bold;
-            font-size: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            font-size: 18px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
             cursor: pointer;
+            text-align: center;
+            width: 80%;
+            max-width: 300px;
         }
     </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
 
-    <!-- This button is explicitly configured to handle the iOS/Android touch activation -->
-    <button id="audioButton" onclick="startAudio()">🔊 ACTIVATE AUDIO FIRST</button>
+    <!-- High-priority button overlay to capture true user-intent context -->
+    <button id="audioButton" onclick="forceIOSAudioUnlock()">🔊 TAP TO UNMUTE & PLAY</button>
 
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
         <a-assets>
-            <audio id="testAudio" src="https://soundhelix.com" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="testAudio" src="https://soundhelix.com" preload="auto" crossorigin="anonymous" loop></audio>
         </a-assets>
 
         <a-marker preset="hiro">
@@ -45,19 +49,25 @@
     </a-scene>
 
     <script>
-        function startAudio() {
+        function forceIOSAudioUnlock() {
             var audio = document.querySelector("#testAudio");
             var button = document.getElementById("audioButton");
-            
+
+            // 1. Force native iOS Audio Context initialization
+            window.AudioContext = window.AudioContext || window.webkitAudioContext;
+            var context = new AudioContext();
+            if (context.state === 'suspended') {
+                context.resume();
+            }
+
+            // 2. Clear mobile receiver mute states and route out of the bottom speakers
             audio.play().then(() => {
-                // Change button appearance to confirm it works
-                button.innerHTML = "✅ AUDIO RUNNING - SCAN NOW";
+                button.innerHTML = "🎉 AUDIO ACTIVE - SCAN NOW";
                 button.style.backgroundColor = "#00cc66";
             }).catch(e => {
-                alert("Playback error: " + e.message);
+                alert("Mute Override Required. Please ensure your physical ring/silent switch on the side of your iPhone is switched UP to RING mode, then try tapping again!");
             });
         }
     </script>
 </body>
 </html>
-
