@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Precision French Test</title>
+    <!-- Include basic AR.js libraries -->
+    <script src="https://aframe.io"></script>
+    <script src="https://githack.com"></script>
+</head>
+<body style="margin: 0; overflow: hidden;">
+    <!-- Simple interface click alert to bypass phone autoplay bans -->
+    <div style="position: absolute; top: 10px; left: 10px; z-index: 999; background: white; padding: 10px; border-radius: 5px;">
+        📢 Tap screen once, then point camera at a Hiro marker!
+    </div>
+
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        <a-assets>
+            <!-- A free sample public sound clip to test audio streaming -->
+            <audio id="testAudio" src="https://google.com" preload="auto"></audio>
+        </a-assets>
+
+        <!-- Use a standard pre-built Hiro marker target -->
+        <a-marker preset="hiro">
+            <!-- This red box will float over the marker when detected -->
+            <a-box position="0 0.5 0" material="color: red;"></a-box>
+        </a-marker>
+
+        
+    </a-scene>
+
+    <script>
+        // Play the sound clip the instant the screen is tapped
+        document.body.addEventListener('click', function() {
+            var audio = document.querySelector("#testAudio");
+            audio.play();
+            console.log("Audio test initiated!");
+        });
+    </script>
+</body>
+</html>
