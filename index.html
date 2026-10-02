@@ -3,8 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Precision French Synthesis Fix</title>
-    <!-- Core 3D engine and Augmented Reality frameworks -->
+    <title>Precision French Scanner</title>
     <script src="https://aframe.io"></script>
     <script src="https://githack.com"></script>
     <style>
@@ -15,74 +14,58 @@
             transform: translateX(-50%);
             z-index: 99999 !important;
             pointer-events: auto !important;
-            background-color: #d11a2a; /* Custom Precision French brand red */
+            background-color: #0044ff;
             color: white;
             padding: 16px 32px;
             border: none;
-            border-radius: 5px;
+            border-radius: 30px;
             font-weight: bold;
             font-size: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             cursor: pointer;
-            width: 85%;
+            width: 80%;
             max-width: 280px;
         }
     </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
 
-    <!-- High-priority button container -->
-    <button id="audioButton" onclick="initializeSynthEngine()">🔊 CALIBRATE AUDIO LAYER</button>
+    <!-- Touch interface to activate audio routing hardware -->
+    <button id="audioButton" onclick="startFrenchAudio()">📢 TAP TO START SCANNER</button>
 
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        <a-assets>
+            <!-- Points to a secure, pre-hosted universal MP3 streaming link -->
+            <audio id="frenchLesson" src="https://onlinetestcase.com" preload="auto" crossorigin="anonymous"></audio>
+        </a-assets>
+
+        <!-- Triggers actions when pointing at a standard Hiro marker -->
         <a-marker preset="hiro">
-            <!-- Floats a bright red block over your tracking marker -->
-            <a-box position="0 0.5 0" material="color: #d11a2a;"></a-box>
+            <a-box position="0 0.5 0" material="color: #ff0000;"></a-box>
         </a-marker>
+
         
     </a-scene>
 
     <script>
-        let audioCtx = null;
+        function startFrenchAudio() {
+            var audio = document.querySelector("#frenchLesson");
+            var button = document.getElementById("audioButton");
 
-        function initializeSynthEngine() {
-            // 1. Initialize the browser context natively to bypass external file security blocks
+            // Build out clean mobile browser context handling
             window.AudioContext = window.AudioContext || window.webkitAudioContext;
-            audioCtx = new AudioContext();
-            
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
+            var context = new AudioContext();
+            if (context.state === 'suspended') {
+                context.resume();
             }
 
-            // 2. Play a rapid diagnostic tone pattern to confirm hardware activation
-            playDiagnosticTone(440, 0.1);  // Note A
-            setTimeout(() => playDiagnosticTone(554.37, 0.1), 120); // Note C#
-            setTimeout(() => playDiagnosticTone(659.25, 0.3), 240); // Note E
-
-            // 3. Update the interface layer button status
-            let btn = document.getElementById("audioButton");
-            btn.innerHTML = "✅ SYSTEM READY - SCAN HIRO";
-            btn.style.backgroundColor = "#00cc66";
-        }
-
-        function playDiagnosticTone(frequency, duration) {
-            if (!audioCtx) return;
-            
-            let oscillator = audioCtx.createOscillator();
-            let gainNode = audioCtx.createGain();
-            
-            oscillator.type = 'sine';
-            oscillator.frequency.value = frequency;
-            
-            // Manage clean volume curves to prevent loud crackles
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + duration);
+            // Play track cleanly
+            audio.play().then(() => {
+                button.innerHTML = "✅ ACTIVE - AIM AT HIRO MARKER";
+                button.style.backgroundColor = "#00cc66";
+            }).catch(e => {
+                alert("Audio system blocked: " + e.message);
+            });
         }
     </script>
 </body>
